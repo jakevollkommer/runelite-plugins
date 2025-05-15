@@ -4,8 +4,8 @@ import com.google.common.base.Strings;
 import net.runelite.api.*;
 import net.runelite.api.Point;
 import net.runelite.client.game.ItemManager;
+import net.runelite.client.game.ItemStats;
 import net.runelite.client.util.ColorUtil;
-import net.runelite.http.api.item.ItemStats;
 
 import java.awt.*;
 
@@ -47,7 +47,7 @@ public class Utils {
             Item[] items = equipment.getItems();
             if (items.length >= 9) {
                 int weaponID = items[EquipmentInventorySlot.WEAPON.getSlotIdx()].getId();
-                final ItemStats stats = itemManager.getItemStats(weaponID, false);
+                final ItemStats stats = itemManager.getItemStats(weaponID);
                 if (stats != null) {
                     return stats.getEquipment().getAspeed();
                 }
