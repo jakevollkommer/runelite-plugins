@@ -13,17 +13,21 @@ public enum NotificationType {
     MINING(Constants.MINING_ANIMATIONS, null),
     WOODCUTTING(Constants.WOODCUTTING_ANIMATIONS, null),
     SMITHING(Constants.SMITHING_ANIMATIONS, null),
+    SAILING(Constants.SAILING_ANIMATIONS, null),
     MANIACALMONKEYS(null, "/eu/jodelahithit/monkey.png"),
     LUNAR(Constants.LUNAR_ANIMATIONS, "/eu/jodelahithit/lunar.png"),
     COMBAT(null, null),
     CUSTOMXP(null, null);
 
 
-    Set<Integer> animations;
-    String customImage;
+    private final Set<Integer> animations;
+    private final String customImage;
 
     NotificationType(Set<Integer> animations, String customImage) {
         this.animations = animations;
         this.customImage = customImage;
     }
+
+    public Set<Integer> getAnimations() { return animations; }
+    public String getCustomImage() { return customImage; }
 }

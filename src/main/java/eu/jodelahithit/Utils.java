@@ -8,15 +8,36 @@ import net.runelite.client.game.ItemStats;
 import net.runelite.client.util.ColorUtil;
 
 import java.awt.*;
+import java.util.Set;
+
+import static net.runelite.api.gameval.InterfaceID.Wornitems.EQUIPMENT;
 
 public class Utils {
+    static void printAnimation(Client client){
+        Player player = client.getLocalPlayer();
+        if(player == null) return;
+        int anim = player.getAnimation();
+        System.out.println(anim);
+    }
+
     static boolean isInAnimation(NotificationType notificationType, Client client) {
         if(notificationType == NotificationType.NONE) return false;
-        if(notificationType.animations == null) return false;
+        return isInAnimation(notificationType.getAnimations(), client);
+    }
+
+    static boolean isInAnimation(int animationID, Client client) {
         Player player = client.getLocalPlayer();
         if(player == null) return false;
         int anim = player.getAnimation();
-        return notificationType.animations.contains(anim);
+        return anim == animationID;
+    }
+
+    static boolean isInAnimation(Set<Integer> animations, Client client) {
+        if(animations == null) return false;
+        Player player = client.getLocalPlayer();
+        if(player == null) return false;
+        int anim = player.getAnimation();
+        return animations.contains(anim);
     }
 
     public static int getStringWidth(Graphics graphics, String text) {
@@ -42,18 +63,21 @@ public class Utils {
     }
 
     public static int getAttackSpeed(Client client, ItemManager itemManager) {
-        final ItemContainer equipment = client.getItemContainer(InventoryID.EQUIPMENT);
+        final ItemContainer equipment = client.getItemContainer(EQUIPMENT);
         if (equipment != null) {
             Item[] items = equipment.getItems();
-            if (items.length >= 9) {
-                int weaponID = items[EquipmentInventorySlot.WEAPON.getSlotIdx()].getId();
-                final ItemStats stats = itemManager.getItemStats(weaponID);
-                if (stats != null) {
-                    return stats.getEquipment().getAspeed();
+            int weaponSlot = EquipmentInventorySlot.WEAPON.getSlotIdx();
+            if (items.length > weaponSlot) {
+                Item weapon = items[weaponSlot];
+                if (weapon != null && weapon.getId() > 0) {
+                    final ItemStats stats = itemManager.getItemStats(weapon.getId());
+                    if (stats != null && stats.getEquipment() != null) {
+                        return stats.getEquipment().getAspeed();
+                    }
                 }
             }
         }
-        return 4;
+        return 4; // default unarmed
     }
 
     public static float clamp(float val, float min, float max) {

@@ -7,6 +7,8 @@ import java.awt.event.KeyEvent;
 
 @ConfigGroup("Skilling Notifications")
 public interface SkillingNotificationsConfig extends Config {
+    public static final String CONFIG_GROUP = "Skilling Notifications";
+
     @ConfigItem(
             hidden = true,
             keyName = "enabled",
@@ -86,8 +88,8 @@ public interface SkillingNotificationsConfig extends Config {
 
     @ConfigItem(
             keyName = "disableWhenWalking",
-            name = "Disable overlay while walking",
-            description = "Disable the idle overlay when the player is walking or running",
+            name = "Disable overlay while moving",
+            description = "Disable the idle overlay when the player is walking, running or sailing",
             position = 7
     )
     default boolean disableWhenWalking() {
@@ -211,10 +213,21 @@ public interface SkillingNotificationsConfig extends Config {
     }
 
     @ConfigItem(
+            keyName = "SAILING",
+            name = "Sailing",
+            description = "Displays notifications when the player is not actively doing sailing tasks",
+            position = 30,
+            section = selectedSkills
+    )
+    default boolean sailing() {
+        return false;
+    }
+
+    @ConfigItem(
             keyName = "COMBAT",
             name = "Combat",
             description = "Displays notifications when the player is not in combat",
-            position = 30,
+            position = 31,
             section = selectedSkills
     )
     default boolean combat() {
@@ -225,7 +238,7 @@ public interface SkillingNotificationsConfig extends Config {
             keyName = "MANIACALMONKEYS",
             name = "Maniacal monkeys",
             description = "Displays notifications when the player is not catching maniacal monkeys",
-            position = 31,
+            position = 32,
             section = selectedSkills
     )
     default boolean maniacalMonkeys() {
@@ -236,7 +249,7 @@ public interface SkillingNotificationsConfig extends Config {
             keyName = "LUNAR",
             name = "Lunar",
             description = "Displays notifications when the player is not casting Lunar crafting spells",
-            position = 32,
+            position = 33,
             section = selectedSkills
     )
     default boolean lunar() {
@@ -274,8 +287,8 @@ public interface SkillingNotificationsConfig extends Config {
 
     @ConfigItem(
             keyName = "WALKINGDELAYV2",
-            name = "Walking delay",
-            description = "Add an extra delay to notifications after walking when 'disable overlay while walking' is enabled",
+            name = "Movement delay",
+            description = "Add an extra delay to notifications after walking, running or sailing when 'disable overlay while moving' is enabled",
             position = 50,
             section = delays
     )
@@ -383,10 +396,21 @@ public interface SkillingNotificationsConfig extends Config {
     }
 
     @ConfigItem(
+            keyName = "SAILINGDELAYV2",
+            name = "Sailing delay",
+            description = "Add an extra delay before the sailing notification",
+            position = 60,
+            section = delays
+    )
+    default int sailingDelay() {
+        return 0;
+    }
+
+    @ConfigItem(
             keyName = "MANIACALMONKEYSDELAYV2",
             name = "Maniacal monkeys delay",
             description = "Add an extra delay before the maniacal monkey notification",
-            position = 60,
+            position = 61,
             section = delays
     )
     default int maniacalMonkeysDelay() {
@@ -396,7 +420,7 @@ public interface SkillingNotificationsConfig extends Config {
             keyName = "LUNARDELAYV2",
             name = "Lunar delay",
             description = "Add an extra delay before the Lunar spell notification",
-            position = 61,
+            position = 62,
             section = delays
     )
     default int lunarDelay() {
@@ -407,7 +431,7 @@ public interface SkillingNotificationsConfig extends Config {
             keyName = "COMBATDELAYV2",
             name = "Combat delay",
             description = "Add an extra delay before the combat notification",
-            position = 62,
+            position = 63,
             section = delays
     )
     default int combatDelay() {
@@ -418,7 +442,7 @@ public interface SkillingNotificationsConfig extends Config {
             keyName = "CUSTOMXPDELAYV2",
             name = "Custom XP delay",
             description = "Add an extra delay before the custom XP notification",
-            position = 63,
+            position = 64,
             section = delays
     )
     default int customXPDelay() {

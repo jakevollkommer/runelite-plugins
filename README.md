@@ -21,10 +21,11 @@ Custom notification delays can be configured for each skill.
 - Smithing
 - Maniacal monkeys (hunter)
 - Lunar spells
+- Sailing
 - Combat
 - Custom XP drops
 
 ## Feedback
 Feel free to contact me on Discord for feedback or suggestions.
 
-Discord: Jodelahithit#0001
+Discord: Jodelahithit

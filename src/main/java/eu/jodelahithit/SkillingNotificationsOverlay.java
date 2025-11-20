@@ -9,7 +9,6 @@ import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.util.ColorUtil;
 
 import java.awt.*;
-import java.time.Duration;
 import java.time.Instant;
 
 public class SkillingNotificationsOverlay extends Overlay {
@@ -17,9 +16,9 @@ public class SkillingNotificationsOverlay extends Overlay {
     private final SkillingNotificationsPlugin plugin;
     private final SkillingNotificationsConfig config;
     private final float TEXT_COLOR_LERP = 0.75f;
-    private Instant fadeInstant = Instant.now();
+    private long lastFadeTime = System.currentTimeMillis();
     private static Instant notificationInstant = Instant.now();
-    private static String notificationText;
+    private static String notificationText = "";
     private boolean previousShouldRender = false;
 
     @Inject
@@ -41,11 +40,11 @@ public class SkillingNotificationsOverlay extends Overlay {
             return input;
         }
 
-        Instant now = Instant.now();
-        float difference = (float) Duration.between(fadeInstant, now).toMillis() / fadeDuration;
+        long now = System.currentTimeMillis();
+        float difference = (now - lastFadeTime) / (float) fadeDuration;
+        lastFadeTime = now;
 
         fadeValue += overlayEnabled ? difference : -difference;
-        fadeInstant = now;
 
         fadeValue = Utils.clamp01(fadeValue);
 
@@ -58,6 +57,7 @@ public class SkillingNotificationsOverlay extends Overlay {
 
     @Override
     public Dimension render(Graphics2D graphics) {
+
         boolean shouldRender = plugin.shouldRenderOverlay();
         if(config.notificationSound() && shouldRender && !previousShouldRender){
             Toolkit.getDefaultToolkit().beep();
@@ -84,7 +84,7 @@ public class SkillingNotificationsOverlay extends Overlay {
         return null;
     }
 
-    public void Notify(String text) {
+    public void notify(String text) {
         notificationInstant = Instant.now();
         notificationText = text;
     }

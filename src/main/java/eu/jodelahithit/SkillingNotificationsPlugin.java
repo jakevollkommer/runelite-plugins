@@ -4,6 +4,7 @@ import com.google.inject.Provides;
 
 import javax.inject.Inject;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.coords.LocalPoint;
@@ -34,14 +35,17 @@ import java.util.List;
 )
 public class SkillingNotificationsPlugin extends Plugin {
     private static final String WALK_HERE = "Walk here";
+    private static final String SET_HEADING = "Set heading";
     private static final int MANIACAL_MONKEYS_REGION_ID = 11662;
     private LocalPoint lastPlayerLocation;
     private Session session;
     private NavigationButton navigationButton;
     private List<NotificationType> selectedNotificationTypes = new ArrayList<>();
-    public Tile lastManiacalMonkeyRockTile = null;
+    private Tile lastManiacalMonkeyRockTile = null;
     private int[] xpCache;
-    public SkillingNotificationsPanel panel;
+
+    @Getter
+    private SkillingNotificationsPanel panel;
 
     @Inject
     Client client;
@@ -78,6 +82,12 @@ public class SkillingNotificationsPlugin extends Plugin {
         clientToolbar.addNavigation(navigationButton);
         overlayManager.add(overlay);
         session = new Session(this);
+
+        Skill[] skills = Skill.values();
+        xpCache = new int[skills.length];
+        for (Skill s : skills) {
+            xpCache[s.ordinal()] = client.getSkillExperience(s);
+        }
     }
 
     @Override
@@ -94,6 +104,7 @@ public class SkillingNotificationsPlugin extends Plugin {
 
     @Subscribe
     public void onClientTick(ClientTick clientTick) {
+        //Utils.printAnimation(client);
         if (!config.enabled()) return;
         for (NotificationType notificationType : selectedNotificationTypes) {
             if (Utils.isInAnimation(notificationType, client)) session.updateInstant(notificationType);
@@ -107,14 +118,19 @@ public class SkillingNotificationsPlugin extends Plugin {
             lastPlayerLocation = playerLocation;
         }
 
+        if(Utils.isInAnimation(Constants.SAILING_HELM_ANIMATIONS, client)){
+            session.updateSailingInstant();
+        }
+
         boolean isInManiacalMonkeysArea = isInManiacalMonkeysArea();
-        if(!isInManiacalMonkeysArea() || (isInManiacalMonkeysArea && lastManiacalMonkeyRockTile != null))
+        if (!isInManiacalMonkeysArea || lastManiacalMonkeyRockTile != null) {
             session.updateInstant(NotificationType.MANIACALMONKEYS);
+        }
     }
 
     @Subscribe
     public void onConfigChanged(ConfigChanged configChanged) {
-        if (configChanged.getGroup().equals("Skilling Notifications")) {
+        if (configChanged.getGroup().equals(SkillingNotificationsConfig.CONFIG_GROUP)) {
             updateSelectedSkills();
         }
     }
@@ -171,22 +187,26 @@ public class SkillingNotificationsPlugin extends Plugin {
 
     @Subscribe
     public void onMenuOptionClicked(MenuOptionClicked event) {
-        if (event.getMenuOption().equals(WALK_HERE)) session.updateWalkingInstant();
+        if (event.getMenuOption().equals(WALK_HERE) || event.getMenuOption().equals(SET_HEADING)) session.updateWalkingInstant();
     }
 
     boolean areSelectedSkillsActive() {
-        boolean isActive = false;
         for (NotificationType notificationType : selectedNotificationTypes) {
-            isActive |= session.isSkillActive(notificationType);
+            if (notificationType == NotificationType.MANIACALMONKEYS && !isInManiacalMonkeysArea()) {
+                continue;
+            }
+            if (session.isSkillActive(notificationType)) {
+                return true;
+            }
         }
-        return isActive;
+        return false;
     }
 
     boolean shouldRenderOverlay() {
         if (!config.enabled()) return false;
         final boolean skills = !selectedNotificationTypes.isEmpty() && !areSelectedSkillsActive();
-        final boolean notWalking = !(config.disableWhenWalking() && session.isWalking(config.walkDelay()));
-        return skills && notWalking;
+        final boolean notMoving = !(config.disableWhenWalking() && (session.isWalking(config.walkDelay()) || session.isSailing()));
+        return skills && notMoving;
     }
 
     public List<NotificationType> getSelectedSkills() {
@@ -196,7 +216,7 @@ public class SkillingNotificationsPlugin extends Plugin {
     void updateSelectedSkills() {
         selectedNotificationTypes.clear();
         for (NotificationType notificationType : NotificationType.values()) {
-            if (Boolean.parseBoolean(configManager.getConfiguration("Skilling Notifications", notificationType.name().toUpperCase()))) {
+            if (Boolean.parseBoolean(configManager.getConfiguration(SkillingNotificationsConfig.CONFIG_GROUP, notificationType.name().toUpperCase()))) {
                 selectedNotificationTypes.add(notificationType);
             }
         }
@@ -204,13 +224,13 @@ public class SkillingNotificationsPlugin extends Plugin {
     }
 
     int getExtraSkillDelay(NotificationType notificationType) {
-        int delay = Integer.parseInt(configManager.getConfiguration("Skilling Notifications", notificationType.name() + "DELAYV2"));
+        int delay = Integer.parseInt(configManager.getConfiguration(SkillingNotificationsConfig.CONFIG_GROUP, notificationType.name() + "DELAYV2"));
         if (notificationType == NotificationType.COMBAT) return Utils.getAttackSpeed(client, itemManager) * 600 + delay;
         return delay;
     }
 
     void setSkillInConfig(NotificationType notificationType) {
-        configManager.setConfiguration("Skilling Notifications", "selectedSkill", notificationType);
+        configManager.setConfiguration(SkillingNotificationsConfig.CONFIG_GROUP, "selectedSkill", notificationType);
     }
 
     boolean isInManiacalMonkeysArea() {
