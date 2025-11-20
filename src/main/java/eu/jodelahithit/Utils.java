@@ -13,13 +13,6 @@ import java.util.Set;
 import static net.runelite.api.gameval.InterfaceID.Wornitems.EQUIPMENT;
 
 public class Utils {
-    static void printAnimation(Client client){
-        Player player = client.getLocalPlayer();
-        if(player == null) return;
-        int anim = player.getAnimation();
-        System.out.println(anim);
-    }
-
     static boolean isInAnimation(NotificationType notificationType, Client client) {
         if(notificationType == NotificationType.NONE) return false;
         return isInAnimation(notificationType.getAnimations(), client);
