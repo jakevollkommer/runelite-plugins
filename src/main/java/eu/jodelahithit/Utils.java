@@ -1,5 +1,6 @@
 package eu.jodelahithit;
 
+import lombok.extern.slf4j.Slf4j;
 import com.google.common.base.Strings;
 import net.runelite.api.*;
 import net.runelite.api.Point;
@@ -12,7 +13,16 @@ import java.util.Set;
 
 import static net.runelite.api.gameval.InterfaceID.Wornitems.EQUIPMENT;
 
+@Slf4j
 public class Utils {
+
+    static void printAnimation(Client client){
+        Player player = client.getLocalPlayer();
+        if(player == null) return;
+        int anim = player.getAnimation();
+        log.debug("Skilling-notifications: " + anim);
+    }
+
     static boolean isInAnimation(NotificationType notificationType, Client client) {
         if(notificationType == NotificationType.NONE) return false;
         return isInAnimation(notificationType.getAnimations(), client);
